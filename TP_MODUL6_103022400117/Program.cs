@@ -1,4 +1,5 @@
-﻿class SayaMusicTrack
+﻿using System.Diagnostics;
+class SayaMusicTrack
 {
     private int id;
     private string playCount;
@@ -6,6 +7,9 @@
 
     public SayaMusicTrack(string title)
     {
+        Debug.Assert(title != null, "Judul track tidak boleh null!");
+        Debug.Assert(title.Length <= 100, "Judul track maksimal 100 karakter!");
+
         this.title = title;
         this.playCount = "0";
 
@@ -15,10 +19,21 @@
 
     public void IncreasePlayCount(int count)
     {
-        int tempPlayCount = int.Parse(this.playCount);
-        tempPlayCount += count;
+        Debug.Assert(count <= 10000000, "Penambahan maksimal 10.000.000 per pemanggilan!");
 
-        this.playCount = tempPlayCount.ToString();
+        try
+        {
+            checked
+            {
+                int tempPlayCount = int.Parse(this.playCount);
+                tempPlayCount += count;
+                this.playCount = tempPlayCount.ToString();
+            }
+        }
+        catch (OverflowException e)
+        {
+            Console.WriteLine("\n[Error] Angka melebihi batas: " + e.Message);
+        }
     }
 
     public void PrintTrackDetails()
@@ -33,14 +48,20 @@ class Program
 {
     static void Main(string[] args)
     {
-        SayaMusicTrack lagu = new SayaMusicTrack("Payung Teduh - Akad");
+        Console.WriteLine("=== PENGUJIAN AMAN ===");
+        SayaMusicTrack lagu1 = new SayaMusicTrack("Payung Teduh - Akad");
+        lagu1.IncreasePlayCount(5000000);
+        lagu1.PrintTrackDetails();
 
-        Console.WriteLine("=== Data Awal ===");
-        lagu.PrintTrackDetails();
+        Console.WriteLine("\n=== PENGUJIAN EXCEPTION OVERFLOW ===");
+        SayaMusicTrack lagu2 = new SayaMusicTrack("Lagu Viral");
 
-        Console.WriteLine("\n=== Setelah Tambah Play Count ===");
-        lagu.IncreasePlayCount(150);
-        lagu.PrintTrackDetails();
+        for (int i = 0; i < 220; i++)
+        {
+            lagu2.IncreasePlayCount(10000000);
+        }
+
+        lagu2.PrintTrackDetails();
 
         Console.ReadLine();
     }
